@@ -3,7 +3,12 @@ FROM ubuntu:focal
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    USE_CCACHE=1 \
+    CCACHE_DIR=/znxt/ccache \
+    ccache -M 10G \
+    CCACHE_EXEC=/usr/bin/ccache \
+    chown cirrus:cirrus /znxt/ccache
 ENV LANG=C.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -93,10 +98,6 @@ RUN set -xe \
   && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
   && chmod 644 /etc/udev/rules.d/51-android.rules \
   && chown root /etc/udev/rules.d/51-android.rules
-
-RUN CCACHE_DIR=/znxt/ccache \
-  && ccache -M 10G \
-  && chown cirrus:cirrus /znxt/ccache
 
 USER root
 
