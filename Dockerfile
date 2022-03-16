@@ -3,16 +3,11 @@ FROM ubuntu:focal
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    USER=cirrus \
-    USE_CCACHE=1 \
-    CCACHE_DIR=/znxt/ccache \
-    CCACHE_EXEC=/usr/bin/ccache
-
+ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=~/bin:/usr/local/bin:/home/cirrus/bin:$PATH
+ENV PATH=~/bin:/usr/local/bin:/home/root/bin:$PATH
 
 # Install all required packages
 RUN apt-get update -q -y \
@@ -66,17 +61,17 @@ RUN apt-get update -q -y \
 WORKDIR /home
 
 RUN set -xe \
-  && mkdir -p /home/cirrus/bin \
-  && curl -sL https://gerrit.googlesource.com/git-repo/+/refs/heads/stable/repo?format=TEXT | base64 --decode  > /home/cirrus/bin/repo \
+  && mkdir -p /home/root/bin \
+  && curl -sL https://gerrit.googlesource.com/git-repo/+/refs/heads/stable/repo?format=TEXT | base64 --decode  > /home/root/bin/repo \
   && curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest \
     | jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64")) | .browser_download_url' | wget -qi - \
   && tar -xzf ghr_*_amd64.tar.gz --wildcards 'ghr*/ghr' --strip-components 1 \
-  && mv ./ghr /home/cirrus/bin/ && rm -rf ghr_*_amd64.tar.gz \
-  && chmod a+rx /home/cirrus/bin/repo \
-  && chmod a+x /home/cirrus/bin/ghr
+  && mv ./ghr /home/root/bin/ && rm -rf ghr_*_amd64.tar.gz \
+  && chmod a+rx /home/root/bin/repo \
+  && chmod a+x /home/root/bin/ghr
   
 
-WORKDIR /home/cirrus
+WORKDIR /home/root
 
 RUN set -xe \
   && mkdir -p extra && cd extra \
@@ -97,6 +92,12 @@ RUN set -xe \
 RUN set -xe \
   && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
   && chmod 644 /etc/udev/rules.d/51-android.rules \
-  && chown ${USER} /etc/udev/rules.d/51-android.rules
+  && chown root /etc/udev/rules.d/51-android.rules
 
-VOLUME ["/home/cirrus", "/znxt/ccache"]
+RUN CCACHE_DIR=/znxt/ccache \
+  && ccache -M 10G \
+  && chown cirrus:cirrus /znxt/ccache
+
+USER root
+
+VOLUME ["/home/root", "/znxt/ccache"]
