@@ -1,51 +1,100 @@
-FROM ubuntu:focal
+FROM ubuntu:20.04 as base-image
 
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 
+RUN uname -a && uname -m
 
-ENV DEBIAN_FRONTEND=noninteractive \
+ENV ANDROID_HOME="/opt/android-sdk"
+
+# support amd64 and arm64
+RUN JDK_PLATFORM=$(if [ "$(uname -m)" = "aarch64" ]; then echo "arm64"; else echo "amd64"; fi) && \
+    echo export JDK_PLATFORM=$JDK_PLATFORM >> /etc/jdk.env && \
+    echo export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-$JDK_PLATFORM/" >> /etc/jdk.env && \
+    echo . /etc/jdk.env >> /etc/bash.bashrc && \
+    echo . /etc/jdk.env >> /etc/profile
+
+ENV TZ=Asia/Jakarta
+
+# Get the latest version from https://developer.android.com/studio/index.html
+ENV ANDROID_SDK_TOOLS_VERSION="6200805_latest"
+
+
+# Set locale
+ENV LANG="en_US.UTF-8" \
+    LANGUAGE="en_US.UTF-8" \
+    LC_ALL="en_US.UTF-8"
+
+RUN apt-get clean && \
+    apt-get update && \
+    apt-get install -y apt-utils locales && \
+    locale-gen $LANG
+
+ENV DEBIAN_FRONTEND="noninteractive" \
+    TERM=dumb \
+    DEBIAN_FRONTEND=noninteractive \
     USE_CCACHE=1 \
     CCACHE_DIR=/znxt/ccache \
     CCACHE_EXEC=/usr/bin/ccache
-ENV LANG=C.UTF-8
-ENV JAVA_OPTS=" -Xmx7G "
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=~/bin:/usr/local/bin:/home/root/bin:$PATH
 
-# Install all required packages
-RUN apt-get update -q -y \
-  && apt-get install -q -y --no-install-recommends \
-    # Core Apt Packages
-    apt-utils apt-transport-https python3-apt \
-    # Linux Standard Base Packages
-    sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev expect \
-    # Upload/Download/Copy/FTP utils
-    git curl wget wput axel rsync \
-    # GNU and other core tools/utils
-    binutils coreutils bsdmainutils util-linux patchutils libc6-dev sudo \
-    # Security CLI tools
-    ssh openssl libssl-dev sshpass gnupg2 gpg \
-    # Tools for interacting with an Android platform
-    android-sdk-platform-tools adb fastboot squashfs-tools \
-    # OpenJDK8 as Java Runtime
-    openjdk-11-jdk ca-certificates-java \
-    maven nodejs \
-    # Python packages
-    python-all-dev python3-dev python3-requests \
-    # Compression tools/utils/libraries
-    zip unzip lzip lzop zlib1g-dev xzdec xz-utils pixz p7zip-full p7zip-rar zstd libzstd-dev lib32z1-dev \
-    # GNU C/C++ compilers and Build Systems
-    build-essential gcc gcc-multilib g++ g++-multilib \
-    # make system and stuff
-    clang llvm lld cmake automake autoconf \
-    # XML libraries and stuff
-    libxml2 libxml2-utils xsltproc expat re2c \
-    # Developer's Libraries for ncurses
-    ncurses-bin libncurses5-dev lib32ncurses5-dev bc libreadline-gplv2-dev libsdl1.2-dev libtinfo5 python-is-python2 ninja-build libcrypt-dev\
-    # Misc utils
-    file gawk xterm screen rename tree schedtool software-properties-common \
+# Variables must be references after they are created
+ENV ANDROID_SDK_HOME="$ANDROID_HOME"
+
+ENV PATH="$JAVA_HOME/bin:$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools"
+
+WORKDIR /tmp
+
+
+# Installing packages
+RUN apt-get update > /dev/null && \
+    apt-get install locales > /dev/null && \
+    locale-gen "$LANG" > /dev/null && \
+    apt-get install -y --no-install-recommends \
+        autoconf \
+        build-essential \
+        curl \
+        file \
+        git \
+        gpg-agent \
+        less \
+        libc6-dev \
+        libgmp-dev \
+        libmpc-dev \
+        libmpfr-dev \
+        libxslt-dev \
+        libxml2-dev \
+        m4 \
+        ncurses-dev \
+        openjdk-11-jdk \
+        openssh-client \
+        pkg-config \
+        software-properties-common \
+        tzdata \
+        unzip \
+        vim-tiny \
+        wget \
+        zip \
+        ssh openssl libssl-dev sshpass gnupg2 gpg \
+        ca-certificates-java \
+        python-all-dev python3-dev python3-requests \
+        binutils coreutils bsdmainutils util-linux patchutils libc6-dev \
+        apt-utils apt-transport-https python3-apt \
+        wput axel rsync \
     dos2unix jq flex bison gperf exfat-utils exfat-fuse libb2-dev pngcrush imagemagick optipng advancecomp \
-    # LTS specific Unique packages
+    build-essential gcc gcc-multilib g++ g++-multilib \
+    clang llvm lld cmake automake autoconf \
+    file gawk xterm screen rename tree schedtool software-properties-common \
+    ncurses-bin libncurses5-dev lib32ncurses5-dev bc libreadline-gplv2-dev libsdl1.2-dev libtinfo5 python-is-python2 ninja-build libcrypt-dev\
+    libxml2 libxml2-utils xsltproc expat re2c \
+    zip unzip lzip lzop zlib1g-dev xzdec xz-utils pixz p7zip-full p7zip-rar zstd libzstd-dev lib32z1-dev \
+        sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev expect \
+        zlib1g-dev > /dev/null && \
+    echo "JVM directories: `ls -l /usr/lib/jvm/`" && \
+    . /etc/jdk.env && \
+    echo "Java version (default):" && \
+    java -version && \
+    echo "set timezone" && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    rm -rf /tmp/* /var/tmp/* \
     ${UNIQ_PACKAGES} \
     # Additional
     kmod \
@@ -61,42 +110,107 @@ RUN apt-get update -q -y \
   && chmod u+s /usr/bin/screen && chmod 755 /var/run/screen \
   && echo "Set disable_coredump false" >> /etc/sudo.conf
 
-WORKDIR /home
+# Install Android SDK
+RUN echo "sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
+    wget --quiet --output-document=sdk-tools.zip \
+        "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip" && \
+    mkdir --parents "$ANDROID_HOME"/cmdline-tools && \
+    unzip -q sdk-tools.zip -d "$ANDROID_HOME"/cmdline-tools  && \
+    rm --force sdk-tools.zip
 
-RUN set -xe \
-  && mkdir -p /home/root/bin \
-  && curl -sL https://gerrit.googlesource.com/git-repo/+/refs/heads/stable/repo?format=TEXT | base64 --decode  > /home/root/bin/repo \
-  && curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest \
-    | jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64")) | .browser_download_url' | wget -qi - \
-  && tar -xzf ghr_*_amd64.tar.gz --wildcards 'ghr*/ghr' --strip-components 1 \
-  && mv ./ghr /home/root/bin/ && rm -rf ghr_*_amd64.tar.gz \
-  && chmod a+rx /home/root/bin/repo \
-  && chmod a+x /home/root/bin/ghr
-  
+# Install SDKs
+# Please keep these in descending order!
+# The `yes` is for accepting all non-standard tool licenses.
+RUN mkdir --parents "$ANDROID_HOME/.android/" && \
+    echo '### User Sources for Android SDK Manager' > \
+        "$ANDROID_HOME/.android/repositories.cfg" && \
+    . /etc/jdk.env && \
+    yes | "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager --licenses > /dev/null
 
-WORKDIR /home/root
+# List all available packages.
+# redirect to a temp file `packages.txt` for later use and avoid show progress
+RUN . /etc/jdk.env && \
+    "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager --list > packages.txt && \
+    cat packages.txt | grep -v '='
 
-RUN set -xe \
-  && mkdir -p extra && cd extra \
-  && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
-  && tar xzf make-4.3.tar.gz \
-  && cd make-*/ \
-  && ./configure && bash ./build.sh 1>/dev/null && install ./make /usr/local/bin/make \
-  && cd .. \
-  && git clone https://github.com/ccache/ccache.git \
-  && cd ccache && git checkout -q v4.2 \
-  && mkdir build && cd build \
-  && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. \
-  && make -j8 && make install \
-  && cd ../../.. \
-  && rm -rf extra
+#
+# https://developer.android.com/studio/command-line/sdkmanager.html
+#
+RUN echo "platforms" && \
+    . /etc/jdk.env && \
+    yes | "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager \
+        "platforms;android-31" > /dev/null
 
-# Set up udev rules for adb
-RUN set -xe \
-  && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
-  && chmod 644 /etc/udev/rules.d/51-android.rules \
-  && chown root /etc/udev/rules.d/51-android.rules
+RUN echo "platform tools" && \
+    . /etc/jdk.env && \
+    yes | "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager \
+        "platform-tools" > /dev/null
+
+RUN echo "build tools 31" && \
+    . /etc/jdk.env && \
+    yes | "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager \
+        "build-tools;31.0.0" > /dev/null
+
+# seems there is no emulator on arm64
+# Warning: Failed to find package emulator
+#RUN echo "emulator" && \
+    #if [ "$(uname -m)" != "x86_64" ]; then echo "emulator only support Linux x86 64bit. skip for $(uname -m)"; exit 0; fi && \
+    #. /etc/jdk.env && \
+    #yes | "$ANDROID_HOME"/cmdline-tools/tools/bin/sdkmanager "emulator" > /dev/null
+
+# List sdk directory content
+RUN ls -l $ANDROID_HOME
+
+RUN du -sh $ANDROID_HOME
+
+# Copy sdk license agreement files.
+RUN mkdir -p $ANDROID_HOME/licenses
+COPY sdk/licenses/* $ANDROID_HOME/licenses/
+
+# Add jenv to control which version of java to use, default to 11.
+RUN git clone https://github.com/jenv/jenv.git ~/.jenv && \
+    echo 'export PATH="$HOME/.jenv/bin:$PATH"' >> ~/.bash_profile && \
+    echo 'eval "$(jenv init -)"' >> ~/.bash_profile && \
+    . ~/.bash_profile && \
+    . /etc/jdk.env && \
+    java -version && \
+    jenv add /usr/lib/jvm/java-11-openjdk-$JDK_PLATFORM && \
+    jenv versions && \
+    jenv global 11 && \
+    java -version
+
+COPY README.md /README.md
+
+ARG BUILD_DATE=""
+ARG SOURCE_BRANCH=""
+ARG SOURCE_COMMIT=""
+ARG DOCKER_TAG=""
+
+ENV BUILD_DATE=${BUILD_DATE} \
+    SOURCE_BRANCH=${SOURCE_BRANCH} \
+    SOURCE_COMMIT=${SOURCE_COMMIT} \
+    DOCKER_TAG=${DOCKER_TAG}
+
+WORKDIR /project
+
+# labels, see http://label-schema.org/
+#LABEL maintainer="Ming Chen"
+#LABEL org.label-schema.schema-version="1.0"
+#LABEL org.label-schema.name="mingc/android-build-box"
+#LABEL org.label-schema.version="${DOCKER_TAG}"
+#LABEL org.label-schema.usage="/README.md"
+#LABEL org.label-schema.docker.cmd="docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'"
+#LABEL org.label-schema.build-date="${BUILD_DATE}"
+#LABEL org.label-schema.vcs-ref="${SOURCE_COMMIT}@${SOURCE_BRANCH}"
+
+
+FROM base-image
 
 USER root
 
-VOLUME ["/home/root", "/znxt/ccache"]
+COPY ROOT/ /
+
+RUN addgroup --quiet --gid 3142 builder
+RUN adduser --disabled-password --quiet --uid 3142 --gid 3142 --gecos "CI Builder,3142,," builder
+
+#USER builder
