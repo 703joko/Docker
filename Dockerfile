@@ -6,8 +6,7 @@ LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 ENV DEBIAN_FRONTEND=noninteractive \
     USE_CCACHE=1 \
     CCACHE_DIR=/znxt/ccache \
-    CCACHE_EXEC=/usr/bin/ccache \
-    chown cirrus /znxt/ccache
+    CCACHE_EXEC=/usr/bin/ccache
 ENV LANG=C.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
