@@ -3,7 +3,12 @@ FROM ubuntu:focal
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    USER=cirrus \
+    USE_CCACHE=1 \
+    CCACHE_DIR=/znxt/ccache \
+    CCACHE_EXEC=/usr/bin/ccache
+
 ENV LANG=C.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -74,6 +79,9 @@ RUN set -xe \
 WORKDIR /home/cirrus
 
 RUN set -xe \
+  && mkdir -p lineage-19.1 && cd lineage-19.1 \
+  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
+  && git clone https://github.com/ariffjenong/local_manifest.git --depth 1 -b LOS19 .repo/local_manifests && cd .. \
   && mkdir -p extra && cd extra \
   && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
   && tar xzf make-4.3.tar.gz \
@@ -86,20 +94,12 @@ RUN set -xe \
   && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. \
   && make -j8 && make install \
   && cd ../../.. \
-  && rm -rf extra \
-  && mkdir -p lineage-19.1 && cd lineage-19.1 \
-  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
-  && git clone https://github.com/ariffjenong/local_manifest.git --depth 1 -b LOS19 .repo/local_manifests
+  && rm -rf extra
 
 # Set up udev rules for adb
 RUN set -xe \
   && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
   && chmod 644 /etc/udev/rules.d/51-android.rules \
   && chown root /etc/udev/rules.d/51-android.rules
-
-RUN CCACHE_DIR=/znxt/ccache ccache -M 10G \
-  && chown cirrus:cirrus /znxt/ccache
-
-USER cirrus
 
 VOLUME ["/home/cirrus", "/znxt/ccache"]
