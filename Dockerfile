@@ -6,7 +6,6 @@ LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 ENV DEBIAN_FRONTEND=noninteractive \
     USE_CCACHE=1 \
     CCACHE_DIR=/znxt/ccache \
-    ccache -M 10G \
     CCACHE_EXEC=/usr/bin/ccache \
     chown cirrus:cirrus /znxt/ccache
 ENV LANG=C.UTF-8
