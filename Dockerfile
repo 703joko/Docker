@@ -97,6 +97,6 @@ RUN set -xe \
 RUN set -xe \
   && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
   && chmod 644 /etc/udev/rules.d/51-android.rules \
-  && chown root /etc/udev/rules.d/51-android.rules
+  && chown ${USER} /etc/udev/rules.d/51-android.rules
 
 VOLUME ["/home/cirrus", "/znxt/ccache"]
