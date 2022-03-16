@@ -20,7 +20,7 @@ RUN apt-get update -q -y \
     # Core Apt Packages
     apt-utils apt-transport-https python3-apt \
     # Linux Standard Base Packages
-    sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev \
+    sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev expect \
     # Upload/Download/Copy/FTP utils
     git curl wget wput axel rsync \
     # GNU and other core tools/utils
@@ -79,9 +79,6 @@ RUN set -xe \
 WORKDIR /home/cirrus
 
 RUN set -xe \
-  && mkdir -p lineage-19.1 && cd lineage-19.1 \
-  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
-  && git clone https://github.com/ariffjenong/local_manifest.git --depth 1 -b LOS19 .repo/local_manifests && cd .. \
   && mkdir -p extra && cd extra \
   && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
   && tar xzf make-4.3.tar.gz \
