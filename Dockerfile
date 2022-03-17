@@ -179,8 +179,6 @@ RUN git clone https://github.com/jenv/jenv.git ~/.jenv && \
     jenv global 11 && \
     java -version
 
-COPY README.md /README.md
-
 ARG BUILD_DATE=""
 ARG SOURCE_BRANCH=""
 ARG SOURCE_COMMIT=""
@@ -193,22 +191,9 @@ ENV BUILD_DATE=${BUILD_DATE} \
 
 WORKDIR /project
 
-# labels, see http://label-schema.org/
-#LABEL maintainer="Ming Chen"
-#LABEL org.label-schema.schema-version="1.0"
-#LABEL org.label-schema.name="mingc/android-build-box"
-#LABEL org.label-schema.version="${DOCKER_TAG}"
-#LABEL org.label-schema.usage="/README.md"
-#LABEL org.label-schema.docker.cmd="docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'"
-#LABEL org.label-schema.build-date="${BUILD_DATE}"
-#LABEL org.label-schema.vcs-ref="${SOURCE_COMMIT}@${SOURCE_BRANCH}"
-
-
-FROM base-image
-
 USER root
 
-COPY ROOT/ /
+COPY root/ /
 
 RUN addgroup --quiet --gid 3142 builder
 RUN adduser --disabled-password --quiet --uid 3142 --gid 3142 --gecos "CI Builder,3142,," builder
