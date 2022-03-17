@@ -104,32 +104,11 @@ VOLUME ["/home/root", "/znxt/ccache"]
 
 WORKDIR /home/root
 
-RUN set -xe \
-  && mkdir znxt \
-  && mkdir -p ~/.config/rclone \
-  && echo "secrets.RCLONE_CONFIG" > ~/.config/rclone/rclone.conf \
+RUN mkdir znxt \
+  && mkdir -p .config/rclone \
+  && echo "secrets.RCLONE_CONFIG" > /.config/rclone/rclone.conf \
   && rclone copy znxtproject:ccache/rom/ccache.tar.gz znxt -P \
-  && cd znxt \
-  && tar xf ccache.tar.gz \
-  && rm ccache.tar.gz && cd .. \
-  && mkdir rom && cd rom \
-  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
-  && git clone https://github.com/ariffjenong/local_manifest.git --depth=1 -b LOS19 .repo/local_manifests \
-  && repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 \
-  && . build/envsetup.sh \
-  && lunch lineage_maple_dsds-userdebug \
-  && export SELINUX_IGNORE_NEVERALLOWS=true \
-  && export CCACHE_DIR=/znxt/ccache \
-  && export CCACHE_EXEC=$(which ccache) \
-  && export USE_CCACHE=1 \
-  && export ALLOW_MISSING_DEPENDENCIES=true \
-  && export WITH_GMS=false \
-  && export BUILD_HOSTNAME=ArifJeNong \
-  && export BUILD_USERNAME=ArifJeNong \
-  && export TZ=Asia/Jakarta \
-  && make bacon -j$(nproc --all) \
-  && cd out/target/product/maple_dsds \
-  && rclone copy $(ls *maple*UNOFFICIAL*.zip) znxtproject:rom/lineage-19.1 -P && rclone copy $(ls *.md5sum) znxtproject:rom/lineage-19.1 -P
+  && cd znxt
   
 
 WORKDIR /home/root
