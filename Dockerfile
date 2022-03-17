@@ -106,7 +106,7 @@ WORKDIR /home/root
 
 RUN mkdir -p znxt \
   && mkdir -p .config/rclone && cd .config/rclone \
-  && echo secrets.RCLONE_CONFIG > rclone.conf && cd ../..
+  && echo secrets.RCLONE_CONFIG > rclone.conf && cd ../.. \
   && rclone copy znxtproject:ccache/lineage-19.1/ccache.tar.gz znxt \
   && rm -rf .config
   
