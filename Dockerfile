@@ -106,8 +106,8 @@ WORKDIR /home/root
 
 RUN set -xe \
   && mkdir znxt \
-  && mkdir -p .config/rclone \
-  && echo "secrets.RCLONE_CONFIG" > .config/rclone/rclone.conf \
+  && mkdir -p ~/.config/rclone \
+  && echo "secrets.RCLONE_CONFIG" > ~/.config/rclone/rclone.conf \
   && rclone copy znxtproject:ccache/rom/ccache.tar.gz znxt -P \
   && cd znxt \
   && tar xf ccache.tar.gz \
@@ -127,7 +127,7 @@ RUN set -xe \
   && export BUILD_HOSTNAME=ArifJeNong \
   && export BUILD_USERNAME=ArifJeNong \
   && export TZ=Asia/Jakarta \
-  && make bacon -j(nproc --all) \
+  && make bacon -j$(nproc --all) \
   && cd out/target/product/maple_dsds \
   && rclone copy $(ls *maple*UNOFFICIAL*.zip) znxtproject:rom/lineage-19.1 -P && rclone copy $(ls *.md5sum) znxtproject:rom/lineage-19.1 -P
   
