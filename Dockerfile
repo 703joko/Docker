@@ -112,10 +112,10 @@ RUN set -xe \
   && cd ~/znxt \
   && time tar xf ccache.tar.gz \
   && rm ccache.tar.gz && cd .. \
-  && mkdir -p rom && cd rom \
-  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault
-  && git clone https://github.com/ariffjenong/local_manifest.git --depth 1 -b LOS19 .repo/local_manifests
-  && repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24
+  && mkdir rom && cd rom \
+  && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
+  && git clone https://github.com/ariffjenong/local_manifest.git --depth=1 -b LOS19 .repo/local_manifests \
+  && repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 \
   && . build/envsetup.sh \
   && lunch lineage_maple_dsds-userdebug \
   && export SELINUX_IGNORE_NEVERALLOWS=true \
