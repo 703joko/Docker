@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ENV LANG=C.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=~/bin:/usr/local/bin:/home/root/bin:$PATH
+ENV PATH=/bin:/usr/local/bin:/home/root/bin:$PATH
 
 # Install all required packages
 RUN apt-get update -q -y \
@@ -105,11 +105,11 @@ VOLUME ["/home/root", "/znxt/ccache"]
 WORKDIR /home/root
 
 RUN set -xe \
-  && mkdir -p ~/znxt \
-  && mkdir -p ~/.config/rclone \
-  && echo "secrets.RCLONE_CONFIG" > ~/.config/rclone/rclone.conf \
-  && time rclone copy znxtproject:ccache/rom/ccache.tar.gz ~/znxt -P \
-  && cd ~/znxt \
+  && mkdir -p /znxt \
+  && mkdir -p /.config/rclone \
+  && echo "secrets.RCLONE_CONFIG" > /.config/rclone/rclone.conf \
+  && time rclone copy znxtproject:ccache/rom/ccache.tar.gz /znxt -P \
+  && cd /znxt \
   && time tar xf ccache.tar.gz \
   && rm ccache.tar.gz && cd .. \
   && mkdir rom && cd rom \
@@ -119,11 +119,9 @@ RUN set -xe \
   && . build/envsetup.sh \
   && lunch lineage_maple_dsds-userdebug \
   && export SELINUX_IGNORE_NEVERALLOWS=true \
-  && export CCACHE_DIR=~/znxt/ccache \
+  && export CCACHE_DIR=/znxt/ccache \
   && export CCACHE_EXEC=$(which ccache) \
   && export USE_CCACHE=1 \
-  && ccache -M 15G \
-  && ccache -z \
   && export ALLOW_MISSING_DEPENDENCIES=true \
   && export WITH_GMS=false \
   && export BUILD_HOSTNAME=ArifJeNong \
@@ -131,5 +129,10 @@ RUN set -xe \
   && export TZ=Asia/Jakarta \
   && make bacon -j(nproc --all) \
   && cd out/target/product/maple_dsds \
-  && rclone copy $(ls *maple*UNOFFICIAL*.zip) znxtproject:rom/lineage-19.1 -P && rclone copy $(ls *.md5sum) znxtproject:rom/lineage-19.1 -P \
-  && cd ~ && rm -rf rom && rm -rf znxt/ccache
+  && rclone copy $(ls *maple*UNOFFICIAL*.zip) znxtproject:rom/lineage-19.1 -P && rclone copy $(ls *.md5sum) znxtproject:rom/lineage-19.1 -P
+  
+
+WORKDIR /home/root
+
+RUN set -xe \
+   && rm -rf rom && rm -rf znxt/ccache
