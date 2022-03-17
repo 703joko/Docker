@@ -105,10 +105,10 @@ VOLUME ["/home/root", "/znxt/ccache"]
 WORKDIR /home/root
 
 RUN mkdir -p znxt \
-  && mkdir -p .config/rclone \
-  && echo "secrets.RCLONE_CONFIG" > /.config/rclone/rclone.conf \
+  && mkdir -p /.config/rclone \
+  && echo "secrets.RCLONE_CONFIG" > /home/root/.config/rclone/rclone.conf \
   && rclone copy znxtproject:ccache/rom/ccache.tar.gz znxt -P \
-  && cd znxt
+  && rm -rf .config
   
 
 WORKDIR /home/root
