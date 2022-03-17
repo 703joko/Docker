@@ -105,12 +105,12 @@ VOLUME ["/home/root", "/znxt/ccache"]
 WORKDIR /home/root
 
 RUN set -xe \
-  && mkdir -p /znxt \
-  && mkdir -p /.config/rclone \
-  && echo "secrets.RCLONE_CONFIG" > /.config/rclone/rclone.conf \
-  && time rclone copy znxtproject:ccache/rom/ccache.tar.gz /znxt -P \
-  && cd /znxt \
-  && time tar xf ccache.tar.gz \
+  && mkdir znxt \
+  && mkdir -p .config/rclone \
+  && echo "secrets.RCLONE_CONFIG" > .config/rclone/rclone.conf \
+  && rclone copy znxtproject:ccache/rom/ccache.tar.gz znxt -P \
+  && cd znxt \
+  && tar xf ccache.tar.gz \
   && rm ccache.tar.gz && cd .. \
   && mkdir rom && cd rom \
   && repo init --depth=1 --no-repo-verify -u https://github.com/ariffjenong/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
@@ -135,4 +135,4 @@ RUN set -xe \
 WORKDIR /home/root
 
 RUN set -xe \
-   && rm -rf rom && rm -rf znxt/ccache
+   && rm -rf rom && rm -rf znxt/ccache && rm -rf .config
