@@ -129,7 +129,7 @@ RUN set -xe \
   && export BUILD_HOSTNAME=ArifJeNong \
   && export BUILD_USERNAME=ArifJeNong \
   && export TZ=Asia/Jakarta \
-  && make bacon -j(nproc --all)
+  && make bacon -j(nproc --all) \
   && cd out/target/product/maple_dsds \
   && rclone copy $(ls *maple*UNOFFICIAL*.zip) znxtproject:rom/lineage-19.1 -P && rclone copy $(ls *.md5sum) znxtproject:rom/lineage-19.1 -P \
   && cd ~ && rm -rf rom && rm -rf znxt/ccache
