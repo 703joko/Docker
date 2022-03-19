@@ -14,6 +14,8 @@ jobs:
     name: Deploy..
     runs-on: ubuntu-latest
     steps:
+      uses: docker://arifjenong/rom:cirrus
+
     - name: Environment..
       uses: docker://arifjenong/rom:cirrus
       run: |
