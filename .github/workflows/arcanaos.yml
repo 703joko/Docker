@@ -16,8 +16,6 @@ jobs:
     container:
       image: arifjenong/rom:cirrus
     steps:
-    - uses: ./
-
     - name: Environment..
       run: |
          sudo apt install -y ccache
