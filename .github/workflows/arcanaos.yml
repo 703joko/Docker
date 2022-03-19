@@ -14,13 +14,13 @@ jobs:
       - image: arifjenong/rom:cirrus
         auth:
           username: arifjenong
-          password: $DOCKER_HUB_PWD
+          password: $.DOCKER_HUB_PWD
     steps:
     - name: checkout
       uses: actions/checkout@v3
 
     - name: Environment..
-      uses: docker
+      uses: ./
       envs:
         timeout: 1m
         command_timeout: 1m
@@ -58,7 +58,7 @@ jobs:
           echo ===========================================
 
     - name: Sync Rom
-      uses: docker
+      uses: ./
       envs:
         timeout: 30m
         command_timeout: 30m
@@ -72,7 +72,7 @@ jobs:
           bash -c "$command" || true
 
     - name: Building Rom
-      uses: docker
+      uses: ./
       envs:
         timeout: 480m
         command_timeout: 480m
@@ -93,7 +93,7 @@ jobs:
           bash -c "$command"
 
     - name: Push Rom
-      uses: docker
+      uses: ./
       envs:
         timeout: 10m
         command_timeout: 10m
