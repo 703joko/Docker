@@ -1,0 +1,107 @@
+name: LineageOS
+on: 
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  build:
+    name: Deploy..
+    runs-on: ubuntu-latest
+    image: arifjenong/rom:cirrus
+    auth:
+      username: arifjenong
+      password: $DOCKER_HUB_PWD
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: Environment..
+      envs:
+        timeout: 1m
+        command_timeout: 1m
+        proxy_timeout: 1m
+        script: |
+          msg() {
+            echo -e "\e[1;32m$*\e[0m"
+          }
+          my_dir="$(pwd)"
+          cd $my_dir
+          rm -rf rom.sh
+          wget https://raw.githubusercontent.com/NFS86/Rom-Builder/master/rom.sh
+          echo ===========================================
+          msg             Check environment.
+          echo ===========================================
+          printenv
+          echo ===========================================
+          
+          echo ===========================================
+          msg             Linux versions.
+          echo ===========================================
+          cat /etc/os*
+          echo ===========================================
+          
+          echo ===========================================
+          msg            Check user active.
+          echo ===========================================
+          w
+          echo ===========================================
+          
+          echo ===========================================
+          msg               Disk available.
+          echo ===========================================
+          lsblk && df -h
+          echo ===========================================
+
+    - name: Sync Rom
+      envs:
+        timeout: 30m
+        command_timeout: 30m
+        script: |
+          my_dir="$(pwd)"
+          rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
+          command="$(head $my_dir/rom.sh -n $(expr $(grep '# build rom' $my_dir/rom.sh -n | cut -f1 -d:) - 1))"
+          mkdir -p $my_dir/$rom_name
+          cd $my_dir/$rom_name
+          rm -rf .repo/local_manifests
+          bash -c "$command" || true
+
+    - name: Building Rom
+      envs:
+        timeout: 480m
+        command_timeout: 480m
+        script: |
+          my_dir="$(pwd)"
+          rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
+          device=$(grep unch $my_dir/rom.sh -m 1 | cut -d ' ' -f 2 | cut -d _ -f 2 | cut -d - -f 1)
+          command="$(tail $my_dir/rom.sh -n +$(expr $(grep 'build/envsetup.sh' $my_dir/rom.sh -n | cut -f1 -d:) - 1)| head -n -1 | grep -v '# end')"
+          cd $my_dir/$rom_name
+          export CCACHE_EXEC=/usr/bin/ccache
+          export USE_CCACHE=1
+          export ALLOW_MISSING_DEPENDENCIES=true
+          ccache -o compression=true
+          ccache -o compression_level=1
+          ccache -o limit_multiple=1
+          ccache -o max_size=150G
+          ccache -z
+          bash -c "$command"
+
+    - name: Push Rom
+      envs:
+        timeout: 10m
+        command_timeout: 10m
+        script: |
+          mkdir -p ~/.config/rclone
+          ls -lh
+          echo "$rclone_config" > ~/.config/rclone/rclone.conf
+          my_dir="$(pwd)"
+          rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
+          device="$(grep unch $my_dir/rom.sh -m 1 | cut -d ' ' -f 2 | cut -d _ -f 2 | cut -d - -f 1)"
+          rel_date="$(date "+%Y%m%d")"
+          output="out/target/product/$device/*$rel_date*.zip"
+          ota="out/target/product/$device/*ota*.zip"
+          cd $my_dir/$rom_name
+          rclone copy --drive-chunk-size 256M --stats 1s $output znxtproject:rom/$rom_name -P
+          rm -rf $my_dir/$rom_name/out/target/product/$device
