@@ -16,9 +16,6 @@ jobs:
     steps:
     - uses: docker://arifjenong/rom:cirrus
 
-    - name: checkout
-      uses: actions/checkout@v3
-
     - name: Environment..
       run: |
          sudo apt install -y ccache
