@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Environment..
-      uses: Run a multi-line script
+      uses: arifjenong/rom@cirrus
       envs:
         timeout: 1m
         command_timeout: 1m
@@ -61,7 +61,7 @@ jobs:
           echo ===========================================
 
     - name: Sync Rom
-      uses: Run a multi-line script
+      uses: arifjenong/rom@cirrus
       envs:
         timeout: 30m
         command_timeout: 30m
@@ -75,7 +75,7 @@ jobs:
           bash -c "$command" || true
 
     - name: Building Rom
-      uses: Run a multi-line script
+      uses: arifjenong/rom@cirrus
       envs:
         timeout: 480m
         command_timeout: 480m
@@ -96,7 +96,7 @@ jobs:
           bash -c "$command"
 
     - name: Push Rom
-      uses: Run a multi-line script
+      uses: arifjenong/rom@cirrus
       envs:
         timeout: 10m
         command_timeout: 10m
