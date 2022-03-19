@@ -14,11 +14,11 @@ jobs:
     name: Deploy..
     runs-on: ubuntu-latest
     steps:
+    - uses: arifjenong/rom@cirrus
     - name: checkout
       uses: actions/checkout@v3
 
     - name: Environment..
-      uses: arifjenong/rom@cirrus
       run: |
           msg() {
             echo -e "\e[1;32m$*\e[0m"
@@ -52,7 +52,6 @@ jobs:
           echo ===========================================
 
     - name: Sync Rom
-      uses: arifjenong/rom@cirrus
       run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -63,7 +62,6 @@ jobs:
           bash -c "$command" || true
 
     - name: Building Rom
-      uses: arifjenong/rom@cirrus
       run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -81,7 +79,6 @@ jobs:
           bash -c "$command"
 
     - name: Push Rom
-      uses: arifjenong/rom@cirrus
       run: |
           mkdir -p ~/.config/rclone
           ls -lh
