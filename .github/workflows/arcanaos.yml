@@ -14,9 +14,8 @@ jobs:
     name: Deploy..
     runs-on: ubuntu-latest
     steps:
-    - uses: docker://arifjenong/rom:cirrus
-
     - name: Environment..
+      uses: docker://arifjenong/rom:cirrus
       run: |
          sudo apt install -y ccache
           
@@ -60,6 +59,7 @@ jobs:
           echo ===========================================
 
     - name: Sync Rom
+      uses: docker://arifjenong/rom:cirrus
       run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -69,6 +69,7 @@ jobs:
           bash -c "$command" || true
 
     - name: Building Rom
+      uses: docker://arifjenong/rom:cirrus
       run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -86,6 +87,7 @@ jobs:
           bash -c "$command"
 
     - name: Push Rom
+      uses: docker://arifjenong/rom:cirrus
       run: |
           mkdir -p ~/.config/rclone
           ls -lh
