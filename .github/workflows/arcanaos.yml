@@ -19,8 +19,6 @@ jobs:
 
     - name: Environment..
       uses: arifjenong/rom@cirrus
-      timeout: 1m
-      command_timeout: 1m
       script: |
           msg() {
             echo -e "\e[1;32m$*\e[0m"
@@ -55,8 +53,6 @@ jobs:
 
     - name: Sync Rom
       uses: arifjenong/rom@cirrus
-      timeout: 30m
-      command_timeout: 30m
       script: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -68,8 +64,6 @@ jobs:
 
     - name: Building Rom
       uses: arifjenong/rom@cirrus
-      timeout: 480m
-      command_timeout: 480m
       script: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
@@ -88,8 +82,6 @@ jobs:
 
     - name: Push Rom
       uses: arifjenong/rom@cirrus
-      timeout: 10m
-      command_timeout: 10m
       script: |
           mkdir -p ~/.config/rclone
           ls -lh
