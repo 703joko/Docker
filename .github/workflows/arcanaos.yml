@@ -27,7 +27,7 @@ jobs:
           my_dir="$(pwd)"
           cd $my_dir
           rm -rf rom.sh
-          wget https://raw.githubusercontent.com/NFS86/Rom-Builder/master/rom.sh
+          wget https://raw.githubusercontent.com/ariffjenong/Dockerer/builder/rom.sh
           echo ===========================================
           msg             Check environment.
           echo ===========================================
