@@ -11,7 +11,7 @@ jobs:
     name: Deploy..
     runs-on: ubuntu-latest
     docker:
-      - image: arifjenong/rom:cirrus
+      - image: arifjenong/rom@cirrus
         auth:
           username: arifjenong
           password: $.DOCKER_HUB_PWD
