@@ -13,18 +13,12 @@ jobs:
   build:
     name: Deploy..
     runs-on: ubuntu-latest
-    docker:
-      - image: arifjenong/rom@cirrus
-        auth:
-          username: arifjenong
-          password: $DOCKER_HUB_PWD
     steps:
     - name: checkout
       uses: actions/checkout@v3
 
     - name: Environment..
       uses: arifjenong/rom@cirrus
-      envs:
         timeout: 1m
         command_timeout: 1m
         proxy_timeout: 1m
@@ -62,7 +56,6 @@ jobs:
 
     - name: Sync Rom
       uses: arifjenong/rom@cirrus
-      envs:
         timeout: 30m
         command_timeout: 30m
         script: |
@@ -76,7 +69,6 @@ jobs:
 
     - name: Building Rom
       uses: arifjenong/rom@cirrus
-      envs:
         timeout: 480m
         command_timeout: 480m
         script: |
@@ -97,7 +89,6 @@ jobs:
 
     - name: Push Rom
       uses: arifjenong/rom@cirrus
-      envs:
         timeout: 10m
         command_timeout: 10m
         script: |
