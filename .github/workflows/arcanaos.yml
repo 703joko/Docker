@@ -19,7 +19,7 @@ jobs:
 
     - name: Environment..
       uses: arifjenong/rom@cirrus
-      script: |
+      run: |
           msg() {
             echo -e "\e[1;32m$*\e[0m"
           }
@@ -53,7 +53,7 @@ jobs:
 
     - name: Sync Rom
       uses: arifjenong/rom@cirrus
-      script: |
+      run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
           command="$(head $my_dir/rom.sh -n $(expr $(grep '# build rom' $my_dir/rom.sh -n | cut -f1 -d:) - 1))"
@@ -64,7 +64,7 @@ jobs:
 
     - name: Building Rom
       uses: arifjenong/rom@cirrus
-      script: |
+      run: |
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
           device=$(grep unch $my_dir/rom.sh -m 1 | cut -d ' ' -f 2 | cut -d _ -f 2 | cut -d - -f 1)
@@ -82,7 +82,7 @@ jobs:
 
     - name: Push Rom
       uses: arifjenong/rom@cirrus
-      script: |
+      run: |
           mkdir -p ~/.config/rclone
           ls -lh
           echo "$rclone_config" > ~/.config/rclone/rclone.conf
