@@ -78,7 +78,7 @@ WORKDIR /home/cirrus
 
 RUN set -xe \
   && mkdir -p .config/rclone \
-  && echo ${{ secrets.RCLONE_CONFIG }} > ~/.config/rclone/rclone.conf
+  && echo ${{ secrets.RCLONE_CONFIG }} > ~/.config/rclone/rclone.conf \
   && mkdir extra && cd extra \
   && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
   && tar xzf make-4.3.tar.gz \
