@@ -27,7 +27,7 @@ jobs:
           my_dir="$(pwd)"
           cd $my_dir
           rm -rf rom.sh
-          wget https://raw.githubusercontent.com/ariffjenong/Dockerer/builder/rom.sh
+          wget https://raw.githubusercontent.com/ariffjenong/Docker/builder/rom.sh
           echo ===========================================
           msg             Check environment.
           echo ===========================================
@@ -83,7 +83,7 @@ jobs:
       run: |
           mkdir -p ~/.config/rclone
           ls -lh
-          echo "$rclone_config" > ~/.config/rclone/rclone.conf
+          echo ${{ secrets.RCLONE_CONFIG }} > ~/.config/rclone/rclone.conf
           my_dir="$(pwd)"
           rom_name="$(grep init $my_dir/rom.sh -m 1 | cut -d / -f 4)"
           device="$(grep unch $my_dir/rom.sh -m 1 | cut -d ' ' -f 2 | cut -d _ -f 2 | cut -d - -f 1)"
