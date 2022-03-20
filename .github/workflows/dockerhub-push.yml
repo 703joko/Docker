@@ -37,8 +37,9 @@ jobs:
           context: ./
           file: ./Dockerfile
           run: echo ${{ secrets.RCLONE_CONFIG }} > ~/.config/rclone/rclone.conf
+          run: rclone copy znxtproject:ccache/lineage-19.1/ccache.tar.gz ~/znxt -P
           push: true
-          tags: arifjenong/rom:latest
+          tags: arifjenong/lineage:latest
 
 
       - name: Image digest
