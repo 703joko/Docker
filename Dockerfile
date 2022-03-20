@@ -1,105 +1,57 @@
-FROM ubuntu:focal
+FROM ubuntu:21.10
 
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    USE_CCACHE=1 \
-    CCACHE_DIR=/znxt/ccache \
-    CCACHE_EXEC=/usr/bin/ccache
-ENV LANG=C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANGUAGE=en_GB.UTF-8
+ENV LANG=en_GB.UTF-8
+ENV LC_ALL=en_GB.UTF-8
 ENV JAVA_OPTS=" -Xmx7G "
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=~/bin:/usr/local/bin:/home/cirrus/bin:$PATH
+ENV CCACHE_DIR=/znxt/ccache
+ENV USE_CCACHE=1
+ENV KERNEL_USE_CCACHE=1
+ENV CIRRUS_CLONE_DEPTH=1
+ENV CIRRUS_WORKING_DIR=/znxt
+ENV ALLOW_MISSING_DEPENDENCIES=true
+ENV KBUILD_BUILD_USER=ArifJeNong
+ENV KBUILD_BUILD_HOST=maple_dsds
+ENV BUILD_USER=ArifJeNong
+ENV BUILD_HOST=maple_dsds
+ENV BUILD_USERNAME=ArifJeNong
+ENV BUILD_HOSTNAME=maple_dsds
+ENV TZ=Asia/Jakarta
+ENV HOME=/root
+ENV PWD=/znxt
+ENV pwd=/znxt
+WORKDIR /znxt
 
-# Install all required packages
-RUN apt-get update -q -y \
-  && apt-get install -q -y --no-install-recommends \
-    # Core Apt Packages
-    apt-utils apt-transport-https python3-apt \
-    # Linux Standard Base Packages
-    sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev expect \
-    # Upload/Download/Copy/FTP utils
-    git curl wget wput axel rsync \
-    # GNU and other core tools/utils
-    binutils coreutils bsdmainutils util-linux patchutils libc6-dev sudo \
-    # Security CLI tools
-    ssh openssl libssl-dev sshpass gnupg2 gpg \
-    # Tools for interacting with an Android platform
-    android-sdk-platform-tools adb fastboot squashfs-tools \
-    # OpenJDK8 as Java Runtime
-    openjdk-11-jdk ca-certificates-java \
-    maven nodejs \
-    # Python packages
-    python-all-dev python3-dev python3-requests \
-    # Compression tools/utils/libraries
-    zip unzip lzip lzop zlib1g-dev xzdec xz-utils pixz p7zip-full p7zip-rar zstd libzstd-dev lib32z1-dev \
-    # GNU C/C++ compilers and Build Systems
-    build-essential gcc gcc-multilib g++ g++-multilib \
-    # make system and stuff
-    clang llvm lld cmake automake autoconf \
-    # XML libraries and stuff
-    libxml2 libxml2-utils xsltproc expat re2c \
-    # Developer's Libraries for ncurses
-    ncurses-bin libncurses5-dev lib32ncurses5-dev bc libreadline-gplv2-dev libsdl1.2-dev libtinfo5 python-is-python2 ninja-build libcrypt-dev\
-    # Misc utils
-    file gawk xterm screen rename tree schedtool software-properties-common \
-    dos2unix jq flex bison gperf exfat-utils exfat-fuse libb2-dev pngcrush imagemagick optipng advancecomp \
-    # LTS specific Unique packages
-    ${UNIQ_PACKAGES} \
-    # Additional
-    kmod \
-  && unset UNIQ_PACKAGES \
-  # Remove useless jre
-  && apt-get -y purge default-jre-headless openjdk-11-jre-headless \
-  # Show installed packages
-  && apt list --installed \
-  # Clean useless apt cache
-  && apt-get -y clean && apt-get -y autoremove \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
-  && dpkg-divert --local --rename /usr/bin/ischroot && ln -sf /bin/true /usr/bin/ischroot \
-  && chmod u+s /usr/bin/screen && chmod 755 /var/run/screen \
-  && echo "Set disable_coredump false" >> /etc/sudo.conf
+RUN apt-get -yqq update
+RUN apt-get -yqq upgrade
+RUN apt-get install  -yqq cloud-guest-utils iproute2 libxml2-dev libxslt1-dev libmemcached-dev awscli libgd-dev libzip-dev asciidoctor docbook-xml docbook-xsl elfutils bash libhiredis-dev redis-server redis-tools sudo tzdata locales python-is-python3 python3-pip pigz tar rsync rclone aria2 ccache curl wget zip unzip lzip lzop zlib1g-dev xzdec xz-utils pixz p7zip-full p7zip-rar zstd libzstd-dev lib32z1-dev ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 libncurses5 adb autoconf automake axel bc bison build-essential ccache clang cmake brotli curl expat fastboot flex g++ g++-multilib gawk gcc gcc-multilib git gnupg gperf htop imagemagick locales libncurses5 lib32ncurses5-dev lib32z1-dev libtinfo5 libc6-dev libcap-dev libexpat1-dev libgmp-dev '^liblz4-.*' '^liblzma.*' libmpc-dev libmpfr-dev libncurses5-dev libsdl1.2-dev libssl-dev libtool libxml-simple-perl libxml2 libxml2-utils lsb-core lzip '^lzma.*' lzop maven nano ncftp ncurses-dev openssh-server sshpass patch patchelf pkg-config pngcrush pngquant python2.7 python-all-dev re2c rclone rsync schedtool squashfs-tools subversion sudo tar texinfo tmate tzdata unzip w3m wget xsltproc zip zlib1g-dev zram-config zstd axel flex bison ncurses-dev texinfo gcc gperf patch libtool automake g++ libncurses5-dev gawk subversion expat libexpat1-dev python-all-dev binutils-dev bc libcap-dev autoconf libgmp-dev build-essential pkg-config libmpc-dev libmpfr-dev autopoint gettext txt2man liblzma-dev libssl-dev libz-dev mercurial wget tar gcc-10 g++-10 cmake ninja-build zstd lz4 liblz4-tool liblz4-dev lzma openjdk-11-jdk golang-go lsb-release wget software-properties-common --fix-broken --fix-missing expect
+RUN apt-get install tzdata
+RUN apt-mark hold tzdata
+RUN echo 'en_GB.UTF-8 UTF-8' > /etc/locale.gen
+RUN /usr/sbin/locale-gen
+RUN ln -snf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+RUN echo Asia/Jakarta > /etc/timezone
+RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+RUN apt install sudo git -yqq
+RUN python3 -m pip  install networkx
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+RUN git config --global user.name ariffjenong
+RUN git config --global user.email arifbuditantodablekk@gmail.com
+RUN git clone https://github.com/akhilnarang/scripts /znxt/scripts
+WORKDIR /znxt/scripts
+RUN bash setup/android_build_env.sh
+RUN git clone https://github.com/I-n-o-k/android_tools /znxt/anu
+WORKDIR /znxt/anu
+RUN bash setup.sh
+WORKDIR /znxt
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /znxt/*
+RUN for t in gcc g++ cc c++ clang clang++; do ln -vs /usr/bin/ccache /usr/local/bin/$t; done
+RUN rm -rf /var/lib/dpkg/info/*.postinst
+RUN dpkg --configure -a
 
-WORKDIR /home
-
-RUN set -xe \
-  && mkdir -p /home/cirrus/bin \
-  && curl -sL https://gerrit.googlesource.com/git-repo/+/refs/heads/stable/repo?format=TEXT | base64 --decode  > /home/cirrus/bin/repo \
-  && curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest \
-    | jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64")) | .browser_download_url' | wget -qi - \
-  && tar -xzf ghr_*_amd64.tar.gz --wildcards 'ghr*/ghr' --strip-components 1 \
-  && mv ./ghr /home/cirrus/bin/ && rm -rf ghr_*_amd64.tar.gz \
-  && chmod a+rx /home/cirrus/bin/repo \
-  && chmod a+x /home/cirrus/bin/ghr
-  
-
-WORKDIR /home/cirrus
-
-RUN set -xe \
-  && mkdir -p .config/rclone \
-  && echo ${{ secrets.RCLONE_CONFIG }} > .config/rclone/rclone.conf \
-  && rclone copy znxtproject:ccache/lineage-19.1/ccache.tar.gz znxt \
-  && mkdir extra && cd extra \
-  && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
-  && tar xzf make-4.3.tar.gz \
-  && cd make-*/ \
-  && ./configure && bash ./build.sh 1>/dev/null && install ./make /usr/local/bin/make \
-  && cd .. \
-  && git clone https://github.com/ccache/ccache.git \
-  && cd ccache && git checkout -q v4.2 \
-  && mkdir build && cd build \
-  && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. \
-  && make -j8 && make install \
-  && cd ../../.. \
-  && rm -rf extra
-
-# Set up udev rules for adb
-RUN set -xe \
-  && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
-  && chmod 644 /etc/udev/rules.d/51-android.rules \
-  && chown root /etc/udev/rules.d/51-android.rules
-
-USER cirrus
-
-VOLUME ["/home/cirrus", "/znxt/ccache"]
+VOLUME ["/znxt/rom", "/znxt/ccache"]
