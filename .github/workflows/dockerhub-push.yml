@@ -35,7 +35,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: arifjenong/rom:cirrus
+          tags: arifjenong/rom:cherish
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
