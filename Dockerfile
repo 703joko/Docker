@@ -45,9 +45,6 @@ RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
     && sudo cp rclone /usr/bin/ && sudo chown root:root /usr/bin/rclone \
     && sudo chmod 755 /usr/bin/rclone
 
-RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
-    && rm -rf brotli kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2
-
 WORKDIR /cirrus/rom
 
 RUN repo init --depth=1 --no-repo-verify -u https://github.com/CherishOS/android_manifest.git -b twelve-one -g default,-mips,-darwin,-notdefault \
@@ -57,6 +54,11 @@ RUN repo init --depth=1 --no-repo-verify -u https://github.com/CherishOS/android
 WORKDIR /cirrus/script
 
 RUN bash setup/android_build_env.sh
+
+WORKDIR /cirrus
+
+RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
+    && rm -rf brotli kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2
 
 VOLUME ["/cirrus/ccache", "/cirrus/rom"]
 ENTRYPOINT ["/bin/bash"]
