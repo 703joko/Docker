@@ -1,105 +1,59 @@
 FROM ubuntu:focal
-
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
+ENV DEBIAN_FRONTEND noninteractive
 
+WORKDIR /cirrus
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    USE_CCACHE=1 \
-    CCACHE_DIR=/znxt/ccache \
-    CCACHE_EXEC=/usr/bin/ccache
-ENV LANG=C.UTF-8
-ENV JAVA_OPTS=" -Xmx7G "
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=~/bin:/usr/local/bin:/home/cirrus/bin:$PATH
+RUN apt-get -yqq update \
+    && mkdir -p rom \
+    && mkdir -p script \
+    && apt-get install --no-install-recommends -yqq adb pigz autoconf automake axel bc bison build-essential ccache clang cmake curl expat expect fastboot flex g++ g++-multilib gawk gcc gcc-multilib git gnupg gperf htop imagemagick locales libncurses5 lib32ncurses5-dev lib32z1-dev libtinfo5 libc6-dev libcap-dev libexpat1-dev libgmp-dev '^liblz4-.*' '^liblzma.*' libmpc-dev libmpfr-dev libncurses5-dev libnl-route-3-dev libprotobuf-dev libsdl1.2-dev libssl-dev libtool libxml-simple-perl libxml2 libxml2-utils lld lsb-core lzip '^lzma.*' lzop maven nano ncftp ncurses-dev openssh-server patch patchelf pkg-config pngcrush pngquant protobuf-compiler python2.7 python3-apt python-all-dev python re2c rclone rsync schedtool screen squashfs-tools subversion sudo tar texinfo tmate tzdata unzip w3m wget xsltproc zip zlib1g-dev zram-config zstd \
+    && curl --create-dirs -L -o /usr/local/bin/repo -O -L https://raw.githubusercontent.com/geopd/git-repo/main/repo \
+    && chmod a+rx /usr/local/bin/repo \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
+    && echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen \
+    && git clone https://github.com/akhilnarang/scripts script \
+    && TZ=Asia/Jakarta \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install all required packages
-RUN apt-get update -q -y \
-  && apt-get install -q -y --no-install-recommends \
-    # Core Apt Packages
-    apt-utils apt-transport-https python3-apt \
-    # Linux Standard Base Packages
-    sudo git ffmpeg maven nodejs ca-certificates-java pigz tar rsync rclone aria2 adb autoconf automake axel bc bison build-essential ccache lsb-core lsb-security ca-certificates systemd udev expect \
-    # Upload/Download/Copy/FTP utils
-    git curl wget wput axel rsync \
-    # GNU and other core tools/utils
-    binutils coreutils bsdmainutils util-linux patchutils libc6-dev sudo \
-    # Security CLI tools
-    ssh openssl libssl-dev sshpass gnupg2 gpg \
-    # Tools for interacting with an Android platform
-    android-sdk-platform-tools adb fastboot squashfs-tools \
-    # OpenJDK8 as Java Runtime
-    openjdk-11-jdk ca-certificates-java \
-    maven nodejs \
-    # Python packages
-    python-all-dev python3-dev python3-requests \
-    # Compression tools/utils/libraries
-    zip unzip lzip lzop zlib1g-dev xzdec xz-utils pixz p7zip-full p7zip-rar zstd libzstd-dev lib32z1-dev \
-    # GNU C/C++ compilers and Build Systems
-    build-essential gcc gcc-multilib g++ g++-multilib \
-    # make system and stuff
-    clang llvm lld cmake automake autoconf \
-    # XML libraries and stuff
-    libxml2 libxml2-utils xsltproc expat re2c \
-    # Developer's Libraries for ncurses
-    ncurses-bin libncurses5-dev lib32ncurses5-dev bc libreadline-gplv2-dev libsdl1.2-dev libtinfo5 python-is-python2 ninja-build libcrypt-dev\
-    # Misc utils
-    file gawk xterm screen rename tree schedtool software-properties-common \
-    dos2unix jq flex bison gperf exfat-utils exfat-fuse libb2-dev pngcrush imagemagick optipng advancecomp \
-    # LTS specific Unique packages
-    ${UNIQ_PACKAGES} \
-    # Additional
-    kmod \
-  && unset UNIQ_PACKAGES \
-  # Remove useless jre
-  && apt-get -y purge default-jre-headless openjdk-11-jre-headless \
-  # Show installed packages
-  && apt list --installed \
-  # Clean useless apt cache
-  && apt-get -y clean && apt-get -y autoremove \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
-  && dpkg-divert --local --rename /usr/bin/ischroot && ln -sf /bin/true /usr/bin/ischroot \
-  && chmod u+s /usr/bin/screen && chmod 755 /var/run/screen \
-  && echo "Set disable_coredump false" >> /etc/sudo.conf
+RUN git clone https://github.com/mirror/make \
+    && cd make && ./bootstrap && ./configure && make CFLAGS="-O3 -Wno-error" \
+    && sudo install ./make /usr/bin/make
 
-WORKDIR /home
+RUN git clone https://github.com/ninja-build/ninja.git \
+    && cd ninja && git reset --hard f404f00 && ./configure.py --bootstrap \
+    && sudo install ./ninja /usr/bin/ninja
 
-RUN set -xe \
-  && mkdir -p /home/cirrus/bin \
-  && curl -sL https://gerrit.googlesource.com/git-repo/+/refs/heads/stable/repo?format=TEXT | base64 --decode  > /home/cirrus/bin/repo \
-  && curl -s https://api.github.com/repos/tcnksm/ghr/releases/latest \
-    | jq -r '.assets[] | select(.browser_download_url | contains("linux_amd64")) | .browser_download_url' | wget -qi - \
-  && tar -xzf ghr_*_amd64.tar.gz --wildcards 'ghr*/ghr' --strip-components 1 \
-  && mv ./ghr /home/cirrus/bin/ && rm -rf ghr_*_amd64.tar.gz \
-  && chmod a+rx /home/cirrus/bin/repo \
-  && chmod a+x /home/cirrus/bin/ghr
-  
+RUN git clone https://github.com/google/kati.git \
+    && cd kati && git reset --hard ac01665 && make ckati \
+    && sudo install ./ckati /usr/bin/ckati
 
-WORKDIR /home/cirrus
+RUN git clone https://github.com/google/nsjail.git \
+    && cd nsjail && git reset --hard e678c25 && make nsjail \
+    && sudo install ./nsjail /usr/bin/nsjail
 
-RUN set -xe \
-  && mkdir -p .config/rclone \
-  && echo ${{ secrets.RCLONE_CONFIG }} > .config/rclone/rclone.conf \
-  && rclone copy znxtproject:ccache/lineage-19.1/ccache.tar.gz znxt \
-  && mkdir extra && cd extra \
-  && wget -q https://ftp.gnu.org/gnu/make/make-4.3.tar.gz \
-  && tar xzf make-4.3.tar.gz \
-  && cd make-*/ \
-  && ./configure && bash ./build.sh 1>/dev/null && install ./make /usr/local/bin/make \
-  && cd .. \
-  && git clone https://github.com/ccache/ccache.git \
-  && cd ccache && git checkout -q v4.2 \
-  && mkdir build && cd build \
-  && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. \
-  && make -j8 && make install \
-  && cd ../../.. \
-  && rm -rf extra
+RUN axel -a -n 10 https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz \
+    && tar xvzf zstd-1.5.2.tar.gz && cd zstd-1.5.2 \
+    && sudo make install
 
-# Set up udev rules for adb
-RUN set -xe \
-  && curl --create-dirs -sL -o /etc/udev/rules.d/51-android.rules -O -L https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules \
-  && chmod 644 /etc/udev/rules.d/51-android.rules \
-  && chown root /etc/udev/rules.d/51-android.rules
+RUN git clone https://github.com/google/brotli.git \
+    && cd brotli && mkdir out && cd out && ../configure-cmake --disable-debug \
+    && make CFLAGS="-O3" && sudo make install
 
-USER cirrus
+RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
+    && unzip rclone-current-linux-amd64.zip && cd rclone-*-linux-amd64 \
+    && sudo cp rclone /usr/bin/ && sudo chown root:root /usr/bin/rclone \
+    && sudo chmod 755 /usr/bin/rclone
 
-VOLUME ["/home/cirrus", "/znxt/ccache"]
+WORKDIR /cirrus/rom
+
+RUN repo init --depth=1 --no-repo-verify -u https://github.com/LineageOS/android.git -b lineage-19.1 -g default,-mips,-darwin,-notdefault \
+    && git clone https://github.com/ariffjenong/local_manifest.git --depth=1 -b LOS19 .repo/local_manifests \
+    && repo sync prebuilts/extract-tools prebuilts/tools-lineage vendor/lineage frameworks/native frameworks/av frameworks/base kernel/sony/msm8998 device/sony/maple_dsds device/sony/yoshino-common vendor/sony/maple_dsds -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24 || repo sync prebuilts/extract-tools prebuilts/tools-lineage vendor/lineage frameworks/native frameworks/av frameworks/base kernel/sony/msm8998 device/sony/maple_dsds device/sony/yoshino-common vendor/sony/maple_dsds -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j24
+
+WORKDIR /cirrus/script
+
+RUN bash setup/android_build_env.sh
+
+VOLUME ["/cirrus/ccache", "/cirrus/rom"]
+ENTRYPOINT ["/bin/bash"]
