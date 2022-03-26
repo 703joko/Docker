@@ -2,7 +2,7 @@ name: Docker Build
 
 on:
   push:
-    branches: [ xdroid ]
+    branches: [ cirrus ]
   workflow_dispatch:
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: arifjenong/rom:xdroid
+          tags: arifjenong/rom:cirrus
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
