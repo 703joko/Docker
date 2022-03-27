@@ -2,7 +2,7 @@ name: Docker Build
 
 on:
   push:
-    branches: [ cherish ]
+    branches: [ cherish_test ]
   workflow_dispatch:
 
 jobs:
