@@ -4,9 +4,9 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -yqq update \
     && apt-get install --no-install-recommends -yqq pigz zstd wget tar expect sudo rclone openjdk-8-jdk bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-gtk3-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev \
-    && mkdir ~/bin \
-    && PATH=~/bin:$PATH \
-    && curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo && chmod a+rx ~/bin/repo \
+    && mkdir /usr/local/bin \
+    && PATH=/usr/local/bin:$PATH \
+    && curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo && chmod a+rx /usr/local/bin/repo \
     && TZ=Asia/Jakarta
 
 WORKDIR /cirrus
