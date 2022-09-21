@@ -24,7 +24,9 @@ RUN git clone https://github.com/ninja-build/ninja.git \
     && cd ninja && git reset --hard f404f00 && ./configure.py --bootstrap \
     && sudo install ./ninja /usr/bin/ninja
 
-RUN git clone --depth=1 https://github.com/ariffjenong/circle -b rclone .config/rclone
+RUN git config --global user.name ariffjenong \
+    && git config --global user.email arifbuditantodablekk@gmail.com \
+    && git clone --depth=1 https://github.com/ariffjenong/circle -b rclone .config/rclone
 
 RUN git clone https://github.com/google/kati.git \
     && cd kati && git reset --hard ac01665 && make ckati \
