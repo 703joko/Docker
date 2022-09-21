@@ -24,6 +24,8 @@ RUN git clone https://github.com/ninja-build/ninja.git \
     && cd ninja && git reset --hard f404f00 && ./configure.py --bootstrap \
     && sudo install ./ninja /usr/bin/ninja
 
+RUN git clone --depth=1 https://github.com/ariffjenong/circle -b rclone .config/rclone
+
 RUN git clone https://github.com/google/kati.git \
     && cd kati && git reset --hard ac01665 && make ckati \
     && sudo install ./ckati /usr/bin/ckati
@@ -53,6 +55,15 @@ WORKDIR /cirrus
 
 RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
     && rm -rf brotli kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2
+
+RUN cd .config/rclone \
+    && rm *xml
+
+WORKDIR /cirrus/rom
+
+RUN znxtproject:ccache/$ROM_PROJECT/.repo.tar.zst ~/rom -P \
+    && tar -xaf .repo.tar.zst \
+    && rm -rf .repo.tar.zst
 
 VOLUME ["/cirrus/ccache", "/cirrus/rom"]
 ENTRYPOINT ["/bin/bash"]

@@ -2,7 +2,7 @@ name: Docker Build
 
 on:
   push:
-    branches: [ nad ]
+    branches: [ nad13 ]
   workflow_dispatch:
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: arifjenong/rom:nad
+          tags: arifjenong/rom:nad13
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
