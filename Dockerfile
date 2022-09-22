@@ -26,7 +26,7 @@ RUN git clone https://github.com/ninja-build/ninja.git \
 
 RUN git config --global user.name ariffjenong \
     && git config --global user.email arifbuditantodablekk@gmail.com \
-    && git clone --depth=1 https://github.com/ariffjenong/circle -b rclone .config/rclone
+    && git clone --depth=1 https://github.com/ariffjenong/circle -b rclone ~/.config/rclone
 
 RUN git clone https://github.com/google/kati.git \
     && cd kati && git reset --hard ac01665 && make ckati \
@@ -58,7 +58,7 @@ WORKDIR /cirrus
 RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
     && rm -rf brotli kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2
 
-RUN cd .config/rclone \
+RUN cd ~/.config/rclone \
     && rm *xml
 
 WORKDIR /cirrus/rom
