@@ -63,9 +63,7 @@ RUN cd ~/.config/rclone \
 
 WORKDIR /cirrus/rom
 
-RUN rclone copy znxtproject:ccache/nad-13/.repo.tar.zst ~/rom -P \
-    && tar -xaf .repo.tar.zst \
-    && rm -rf .repo.tar.zst
+RUN rclone copy znxtproject:ccache/nad-13/.repo.tar.zst ~/rom -P
 
 VOLUME ["/cirrus/ccache", "/cirrus/rom"]
 ENTRYPOINT ["/bin/bash"]
