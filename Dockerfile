@@ -63,7 +63,7 @@ RUN cd .config/rclone \
 
 WORKDIR /cirrus/rom
 
-RUN znxtproject:ccache/nad-13/.repo.tar.zst ~/rom -P \
+RUN rclone copy znxtproject:ccache/nad-13/.repo.tar.zst ~/rom -P \
     && tar -xaf .repo.tar.zst \
     && rm -rf .repo.tar.zst
 
