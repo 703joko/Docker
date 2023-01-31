@@ -1,12 +1,6 @@
 FROM ubuntu:22.04
 LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
-
 ENV DEBIAN_FRONTEND noninteractive
-ENV LANG=C.UTF-8
-ENV LC_ALL=C
-ENV ANDROID_JACK_VM_ARGS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx120G"
-ENV JAVA_OPTS=" -Xmx120G "
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 WORKDIR /cirrus
 
@@ -29,14 +23,6 @@ RUN git clone https://github.com/mirror/make \
     && cd make && ./bootstrap && ./configure && make CFLAGS="-O3 -Wno-error" \
     && sudo install ./make /usr/bin/make
 
-RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.2.tar.gz \
-    && tar xzf libwebp-1.2.2.tar.gz \
-    && cd libwebp-1.2.2 \
-    && export PATH="/cirrus/ccache:$PATH" \
-    && which clang \
-    && ./configure \
-    && make -j$(nproc --all)
-
 RUN git clone https://github.com/ninja-build/ninja.git \
     && cd ninja && ./configure.py --bootstrap \
     && sudo install ./ninja /usr/bin/ninja
@@ -58,18 +44,6 @@ RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
     && sudo cp rclone /usr/bin/ && sudo chown root:root /usr/bin/rclone \
     && sudo chmod 755 /usr/bin/rclone
 
-RUN git clone --depth 1 https://github.com/TheLartians/Ccache.cmake .Ccache.cmake \
-    && cd .Ccache.cmake \
-    && cmake -Htest -Bbuild -DUSE_CCACHE=YES -DCCACHE_OPTIONS="CCACHE_CPP2=true;CCACHE_SLOPPINESS=clang_index_store" \
-    && cmake --build build \
-    && cmake -Htest -Bbuildx -GNinja -DUSE_CCACHE=YES -DCCACHE_OPTIONS="CCACHE_CPP2=true;CCACHE_SLOPPINESS=clang_index_store" \
-    && cmake --build buildx
-
-RUN set -x \
-    && curl -LO https://github.com/cli/cli/releases/download/v2.20.2/gh_2.20.2_linux_amd64.deb \
-    && dpkg -i gh* \
-    && rm gh*
-
 WORKDIR /cirrus/script
 
 RUN bash setup/android_build_env.sh
@@ -77,9 +51,7 @@ RUN bash setup/android_build_env.sh
 WORKDIR /cirrus
 
 RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
-    && rm -rf /var/lib/dpkg/info/*.postinst \
-    && dpkg --configure -a \
-    && rm -rf libwebp-1.2.2.tar.gz libwebp-1.2.2 rclone-v1.61.1-linux-amd64 \
+    && rm -rf rclone-v1.61.1-linux-amd64 \
     && rm -rf kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2 \
     && ls
 
