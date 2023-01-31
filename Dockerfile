@@ -43,15 +43,15 @@ RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/
     && make -j$(nproc --all)
 
 RUN git clone https://github.com/ninja-build/ninja.git \
-    && cd ninja && git reset --hard f404f00 && ./configure.py --bootstrap \
+    && cd ninja && ./configure.py --bootstrap \
     && sudo install ./ninja /usr/bin/ninja
 
 RUN git clone https://github.com/google/kati.git \
-    && cd kati && git reset --hard ac01665 && make ckati \
+    && cd kati && make ckati \
     && sudo install ./ckati /usr/bin/ckati
 
 RUN git clone https://github.com/google/nsjail.git \
-    && cd nsjail && git reset --hard e678c25 && make nsjail \
+    && cd nsjail && make nsjail \
     && sudo install ./nsjail /usr/bin/nsjail
 
 RUN axel -a -n 10 https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz \
@@ -84,7 +84,7 @@ WORKDIR /cirrus
 RUN rm zstd-1.5.2.tar.gz rclone-current-linux-amd64.zip \
     && rm -rf /var/lib/dpkg/info/*.postinst \
     && dpkg --configure -a \
-    && rm -rf libwebp-1.2.2.tar.gz \
+    && rm -rf libwebp-1.2.2.tar.gz libwebp-1.2.2 rclone-v1.61.1-linux-amd64 \
     && rm -rf kati make ninja nsjail rclone-v1.58.0-linux-amd64 script zstd-1.5.2 \
     && ls
 
