@@ -4,14 +4,9 @@ LABEL maintainer="ariffjenong <arifbuditantodablekk@gmail.com>"
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C
-ENV USE_CCACHE=1
 ENV ANDROID_JACK_VM_ARGS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx120G"
 ENV JAVA_OPTS=" -Xmx120G "
-ENV BUILD_USERNAME=znxt
-ENV CCACHE_EXEC=/usr/bin/ccache
-ENV BUILD_HOSTNAME=NAD
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV USER=znxt
 
 WORKDIR /cirrus
 
@@ -37,7 +32,7 @@ RUN git clone https://github.com/mirror/make \
 RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.2.tar.gz \
     && tar xzf libwebp-1.2.2.tar.gz \
     && cd libwebp-1.2.2 \
-    && export PATH="/usr/lib/ccache:$PATH" \
+    && export PATH="/cirrus/ccache:$PATH" \
     && which clang \
     && ./configure \
     && make -j$(nproc --all)
